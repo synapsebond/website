@@ -164,9 +164,9 @@ function MainApp() {
 		return hashBuffer;
 	}
 
-	async function signUSDCPermit() {
+	async function signTokenPermit(isBuy, tokenAddress) {
 		const contract = {
-			address: USDC_ADDRESS,
+			address: tokenAddress,
 			abi: ERC20_ABI,
 		};
 		const readResults = await readContracts(config, {
@@ -194,14 +194,14 @@ function MainApp() {
 
 		const name = nameResult.result;
 		const spender = ROUTER_ADDRESS;
-		const value = Big(price).mul(amount).div(Big('1e18'));
+		const value = isBuy ? Big(price).mul(amount).div(Big('1e18')) : Big(amount);
 		const deadline = BigInt(Big(Date.now()).div('1000').toFixed(0)) + BigInt('86400'); // 24 hours later
 
 		const domain = {
 			name: name,
 			version: version,
 			chainId: BASE_CHAIN_ID,
-			verifyingContract: USDC_ADDRESS,
+			verifyingContract: tokenAddress,
 		};
 
 		const types = {
@@ -217,8 +217,8 @@ function MainApp() {
 		const message = {
 			owner: account.address,
 			spender: spender,
-			value: value,
-			nonce: Big(nonce).toString(),
+			value: value.toFixed(0),
+			nonce: Big(nonce).toFixed(0),
 			deadline: deadline.toString()
 		};
 		signTypedData({
@@ -232,7 +232,7 @@ function MainApp() {
 				else setSellerPermitSignature(data);
 			},
 			onError(error) {
-				console.error('Error signing USDC permit:', error);
+				console.error('Error signing permit:', error);
 			}
 		});
 	}
@@ -254,10 +254,13 @@ function MainApp() {
 		}, {
 			onSuccess(data) {
 				setLocked(true);
-				if (isBuy) setBuyerSignature(data);
-				else setSellerSignature(data);
-
-				signUSDCPermit();
+				if (isBuy) {
+					setBuyerSignature(data);
+					signTokenPermit(true, USDC_ADDRESS);
+				} else {
+					setSellerSignature(data);
+					signTokenPermit(false, token);
+				}
 			}
 		});
 	}
@@ -336,7 +339,7 @@ function MainApp() {
 							<label htmlFor="price">Price set</label>
 							<input
 								id="price"
-								onChange={e => setPrice((BigInt(Big(e.target.value).mul(Big(1e6)))))}
+								onChange={e => setPrice((BigInt(Big(e.target.value).mul(Big(1e6)).toFixed(0))))}
 								placeholder='0.00'
 								disabled={locked}
 							/>
@@ -345,7 +348,7 @@ function MainApp() {
 							<label htmlFor="amount">Amount</label>
 							<input
 								id="amount"
-								onChange={e => setAmount((BigInt(e.target.value) * (BigInt(1e18))))}
+								onChange={e => setAmount((BigInt(Big(e.target.value).mul(Big(1e18)).toFixed(0))))}
 								placeholder='1000'
 								disabled={locked}
 							/>
