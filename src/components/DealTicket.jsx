@@ -16,7 +16,8 @@ function DealTicket({
 	buyerSignature,
 	sellerSignature,
 	buyerPermitSignature,
-	sellerPermitSignature
+	sellerPermitSignature,
+  themeNonce
 }) {
 	const account = useAccount();
 	const [encoded, setEncoded] = useState('uninitialized');
@@ -25,8 +26,8 @@ function DealTicket({
 		color: 'rgb(0, 0, 0)',
 	});
 
-	function randomizeTheme() {
-		const colorPair = colors[Math.floor(Math.random() * colors.length)];
+	function randomizeTheme() { // not really
+		const colorPair = colors[themeNonce];
 		setTheme({
 			backgroundColor: `rgb(${colorPair[0].join(',')})`,
 			color: `rgb(${colorPair[1].join(',')})`,
@@ -43,7 +44,9 @@ function DealTicket({
 			buyerSignature,
 			sellerSignature,
 			buyerPermitSignature,
-			sellerPermitSignature
+			sellerPermitSignature,
+      
+      themeNonce
 		}));
 	}, [
 		isBuy, token,
@@ -52,7 +55,8 @@ function DealTicket({
 		buyerSignature,
 		sellerSignature,
 		buyerPermitSignature,
-		sellerPermitSignature
+		sellerPermitSignature,
+    themeNonce
 	]);
 
 	return (

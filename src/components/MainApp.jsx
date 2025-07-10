@@ -1,4 +1,4 @@
-import { CircleX, Download, Import } from 'lucide-react';
+import { CircleX, Download, Import, Paintbrush, PaintBucket, PaintRoller } from 'lucide-react';
 import { useEffect, useState } from 'react'
 
 import DealTicket from "./DealTicket.jsx";
@@ -8,6 +8,8 @@ import { useAccount, useReadContract, useSignMessage, useSignTypedData } from 'w
 import { keccak256, toHex } from 'viem';
 import { readContracts } from 'wagmi/actions';
 import config from '../config.js';
+
+import Arrow from "../assets/arrow.svg"
 
 const ERC20_ABI = [
 	{
@@ -98,6 +100,9 @@ function MainApp() {
 	
 	const account = useAccount();
 	const {signMessage} = useSignMessage();
+
+	const [moveHint, setMoveHint] = useState(false);
+	const [themeNonce, setThemeNonce] = useState(Math.floor(Math.random() * 500));
 
 	// TODO: Make this to not use generic variable names
 	const { data, error } = useReadContract({
@@ -332,6 +337,7 @@ function MainApp() {
 					sellerSignature={sellerSignature}
 					buyerPermitSignature={buyerPermitSignature}
 					sellerPermitSignature={sellerPermitSignature}
+					themeNonce={themeNonce}
 				/>
 				<div className={style.dealTicketFooter}>
 					<div>
@@ -342,6 +348,13 @@ function MainApp() {
 					</div>
 					<div>
 						<CircleX strokeWidth={'1.5px'} size={18} /> Reject Deal
+					</div>
+					<div className={style.randomTheme} onMouseOver={() => setMoveHint(true)} onMouseLeave={() => setMoveHint(false)} onClick={() => setThemeNonce(Math.floor(Math.random() * 500))}>
+						<Paintbrush strokeWidth={'1.5px'} size={18} />
+					</div>
+					<div className={style.randomThemeHint + ' ' + (moveHint ? style.randomThemeHintMove : '')}>
+						<img src={Arrow} />
+						{/* <span>{";)"}</span> */}
 					</div>
 				</div>
 			</div>
