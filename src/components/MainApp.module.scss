@@ -67,4 +67,37 @@
 			background: var(--l2-bg-color);
 		}
 	}
+
+	> div:last-child > input {
+		border-bottom: 0;
+	}
+}
+
+.dealTicket {
+	display: flex;
+	flex-direction: column;
+}
+
+.dealTicketFooter {
+	flex: 1;
+	
+	border-top: 1px solid var(--bd-color);
+
+	> div {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: var(--padding-sm);
+
+		gap: var(--padding-sm);
+		cursor: pointer;
+	}
+
+	&:hover {
+		background: var(--bd-color);
+	}
+}
+
+.active {
+	background: var(--bd-color) !important;
 }

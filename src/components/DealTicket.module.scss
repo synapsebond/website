@@ -1,0 +1,59 @@
+.container {
+	position: relative;
+	height: 100%;
+	padding: var(--padding-md);
+	min-width: 400px;
+
+	background: #fbfbfb;
+}
+
+.card {
+	display: flex;
+	flex-direction: column;
+	gap: var(--padding-md);
+}
+
+.top {
+	display: flex;
+	gap: var(--padding-md);
+}
+
+.bottom {
+	display: flex;
+	flex-direction: column;
+}
+
+.details {
+	> div {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 10px;
+
+		> span:first-child {
+			color: var(--l2-fg-color);
+		}
+	}
+}
+
+.detailsException {
+	flex-direction: row !important;
+	align-items: center;
+}
+
+.buy, .sell {
+	margin-right: 10px;
+	padding: 4px 8px;
+	border-radius: 10px;
+
+	color: white !important;
+	font-size: smaller;
+	font-weight: bold;
+	transform: translateY(1px);
+}
+
+.buy {
+	background: #29db29;
+}
+.sell {
+	background: #d93d3d;
+}
