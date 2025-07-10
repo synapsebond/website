@@ -4,12 +4,13 @@ import './index.scss'
 import './App.scss'
 
 import NavBar from './components/NavBar.jsx'
+import MainApp from './components/MainApp.jsx'
 
 function App() {
   return (
     <>
       <NavBar />
-      {/* <Hero /> */}
+      <MainApp />
     </>
   )
 }

@@ -8,6 +8,9 @@
 	--fg-color: #eeeeee;
 	--bd-color: #333333;
 	--ac-color: #26c394;
+
+	--l2-bg-color: #111;
+	--l2-fg-color: #ddd;
 }
 
 * {
@@ -20,8 +23,24 @@ body {
 	min-height: 100vh;
 
 	font-family: Arial, Helvetica, sans-serif;
+	text-rendering: optimizeLegibility;
+}
+
+#root > div {
+	min-height: 100vh;
+
 	color: var(--fg-color);
 	background: var(--bg-color);
 
 	border: 1px solid var(--bd-color);
+}
+
+input {
+	padding: var(--padding-sm);
+	border: 1px solid var(--bd-color);
+
+	background: transparent;
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
 }
