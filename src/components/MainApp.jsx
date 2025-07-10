@@ -232,6 +232,7 @@ function MainApp() {
 				else setSellerPermitSignature(data);
 			},
 			onError(error) {
+				setLocked(false);
 				console.error('Error signing permit:', error);
 			}
 		});
@@ -261,6 +262,10 @@ function MainApp() {
 					setSellerSignature(data);
 					signTokenPermit(false, token);
 				}
+			},
+			onError(error) {
+				setLocked(false);
+				console.error('Error signing deal message:', error);
 			}
 		});
 	}
