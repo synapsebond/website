@@ -23,8 +23,13 @@ function DealTicket({ isBuy, token, tokenName, tokenSymbol, secondParty, price, 
 
 	useEffect(() => {
 		randomizeTheme();
-		setEncoded(JSON.stringify({ isBuy, token, secondParty, price, amount }));
-	}, [isBuy, token, secondParty, price, amount]);
+		setEncoded(JSON.stringify({
+			token,
+			buyer: isBuy ? account.address : secondParty,
+			seller: !isBuy ? account.address : secondParty,
+			price, amount
+		}));
+	}, [isBuy, token, account, secondParty, price, amount]);
 
 	return (
 		<div className={style.container} style={theme}>
@@ -49,14 +54,30 @@ function DealTicket({ isBuy, token, tokenName, tokenSymbol, secondParty, price, 
 						</div>
 					</div>
 				</div>
-				<div className={style.bottom + ' ' + style.details}>
-					<div>
-						<span>Buyer</span>
-						<span>{isBuy ? account.address : secondParty}</span>
+				<div className={style.bottom}>
+					<div className={style.details}>
+						<div>
+							<span>Buyer</span>
+							<span>{isBuy ? account.address : secondParty}</span>
+						</div>
+						<div>
+							<span>Seller</span>
+							<span>{!isBuy ? account.address : secondParty}</span>
+						</div>
+						<div>
+							<span>Deadline</span>
+							<span>20 November 2030 12:30:23 (GMT+1)</span>
+						</div>
 					</div>
-					<div>
-						<span>Seller</span>
-						<span>{!isBuy ? account.address : secondParty}</span>
+					<div className={style.signDetails}>
+						<div>
+							<span>Buyer Signed</span>
+							<span>Not yet</span>
+						</div>
+						<div>
+							<span>Seller Signed</span>
+							<span>Not yet</span>
+						</div>
 					</div>
 				</div>
 			</div>

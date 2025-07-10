@@ -9,6 +9,7 @@
 
 .card {
 	display: flex;
+	height: 100%;
 	flex-direction: column;
 	gap: var(--padding-md);
 }
@@ -20,10 +21,28 @@
 
 .bottom {
 	display: flex;
+	height: 100%;
 	flex-direction: column;
+	justify-content: space-between;
 }
 
 .details {
+	> div {
+		display: flex;
+		flex-direction: column;
+		margin-bottom: 10px;
+
+		> span:first-child {
+			color: var(--l2-fg-color);
+		}
+	}
+}
+
+.signDetails {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	
 	> div {
 		display: flex;
 		flex-direction: column;
