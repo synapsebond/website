@@ -5,7 +5,19 @@ import { QRCodeSVG } from 'qrcode.react';
 import style from './DealTicket.module.scss'
 import { useAccount } from 'wagmi';
 
-function DealTicket({ isBuy, token, tokenName, tokenSymbol, secondParty, price, amount }) {
+function DealTicket({
+	isBuy,
+	token,
+	tokenName,
+	tokenSymbol,
+	secondParty,
+	price,
+	amount,
+	buyerSignature,
+	sellerSignature,
+	buyerPermitSignature,
+	sellerPermitSignature
+}) {
 	const account = useAccount();
 	const [encoded, setEncoded] = useState('uninitialized');
 	const [theme, setTheme] = useState({
@@ -27,9 +39,21 @@ function DealTicket({ isBuy, token, tokenName, tokenSymbol, secondParty, price, 
 			token,
 			buyer: isBuy ? account.address : secondParty,
 			seller: !isBuy ? account.address : secondParty,
-			price, amount
+			price, amount,
+			buyerSignature,
+			sellerSignature,
+			buyerPermitSignature,
+			sellerPermitSignature
 		}));
-	}, [isBuy, token, account, secondParty, price, amount]);
+	}, [
+		isBuy, token,
+		account, secondParty,
+		price, amount,
+		buyerSignature,
+		sellerSignature,
+		buyerPermitSignature,
+		sellerPermitSignature
+	]);
 
 	return (
 		<div className={style.container} style={theme}>
@@ -72,11 +96,11 @@ function DealTicket({ isBuy, token, tokenName, tokenSymbol, secondParty, price, 
 					<div className={style.signDetails}>
 						<div>
 							<span>Buyer Signed</span>
-							<span>Not yet</span>
+							<span>{buyerSignature && buyerPermitSignature ? 'Yes' : 'No'}</span>
 						</div>
 						<div>
 							<span>Seller Signed</span>
-							<span>Not yet</span>
+							<span>{sellerSignature && sellerPermitSignature ? 'Yes' : 'No'}</span>
 						</div>
 					</div>
 				</div>

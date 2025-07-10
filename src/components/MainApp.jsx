@@ -1,13 +1,13 @@
-import { CircleX, Cross, Download, Import } from 'lucide-react';
+import { CircleX, Download, Import } from 'lucide-react';
 import { useEffect, useState } from 'react'
 
 import DealTicket from "./DealTicket.jsx";
 
 import style from './MainApp.module.scss'
-import { useReadContract } from 'wagmi';
-import { getToken } from 'wagmi/actions';
+import { useAccount, useReadContract, useSignMessage, useSignTypedData } from 'wagmi';
+import { keccak256, toHex } from 'viem';
+import { readContracts } from 'wagmi/actions';
 import config from '../config.js';
-import { readContract } from 'viem/actions';
 
 const ERC20_ABI = [
 	{
@@ -36,9 +36,52 @@ const ERC20_ABI = [
 		"stateMutability": "view",
 		"type": "function"
 	},
+	{
+		inputs: [],
+		stateMutability: "view",
+		type: "function",
+		name: "name",
+		outputs: [
+			{
+				internalType: "string",
+				name: "",
+				type: "string",
+			},
+		],
+	},
+	{
+		inputs: [
+			{
+				internalType: "address",
+				name: "owner",
+				type: "address",
+			},
+		],
+		stateMutability: "view",
+		type: "function",
+		name: "nonces",
+		outputs: [
+			{
+				internalType: "uint256",
+				name: "",
+				type: "uint256",
+			},
+		],
+	},
+	{
+		inputs: [],
+		name: "version",
+		outputs: [{ internalType: "string", name: "", type: "string" }],
+		stateMutability: "view",
+		type: "function",
+	},
 ];
 
 function MainApp() {
+	const USDC_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+	const ROUTER_ADDRESS = "0x0000000000000000000000000000000000000123";
+	const BASE_CHAIN_ID = 8453;
+
 	const [isBuy, setIsBuy] = useState(true);
 	const [token, setToken] = useState('');
 	const [tokenName, setTokenName] = useState('Null Token');
@@ -47,6 +90,15 @@ function MainApp() {
 	const [price, setPrice] = useState('0.00');
 	const [amount, setAmount] = useState('0');
 
+	const [buyerSignature, setBuyerSignature] = useState('');
+	const [sellerSignature, setSellerSignature] = useState('');
+	const [buyerPermitSignature, setBuyerPermitSignature] = useState('');
+	const [sellerPermitSignature, setSellerPermitSignature] = useState('');
+	
+	const account = useAccount();
+	const {signMessage} = useSignMessage();
+
+	// TODO: Make this to not use generic variable names
 	const { data, error } = useReadContract({
 		abi: ERC20_ABI,
 		address: token,
@@ -71,11 +123,125 @@ function MainApp() {
 		if (symbolError) console.error('Error fetching token symbol:', symbolError);
 	}, [symbolData, symbolError]);
 
+	function createDealMessage() {
+		const buyer = isBuy ? account.address : secondParty;
+		const seller = !isBuy ? account.address : secondParty;
+		const initiatedAt = Math.floor(Date.now() / 1000);
+		const deadline = initiatedAt + 86400; // 24 hours later
+		const message =
+			`Buyer: ${buyer}\n` +
+			`Seller: ${seller}\n` +
+			`For token: ${token}\n` +
+			`Price: ${price}\n` +
+			`For ${amount} amount of tokens\n` +
+			`Initiated at: ${initiatedAt}\n` +
+			`With deadline at: ${deadline}`;
+		const fullMessage = message;
+		return fullMessage;
+	}
+
+	function appendPrefix(message) {
+		const prefix = `Ethereum Signed Message:\n${message.length}`;
+		return prefix + message;
+	}
+
+	function hashDeal() {
+		const fullMessage = appendPrefix(createDealMessage());
+		const hashBuffer = keccak256(toHex(fullMessage));
+		return hashBuffer;
+	}
+
+	async function signUSDCPermit() {
+		const contract = {
+			address: USDC_ADDRESS,
+			abi: ERC20_ABI,
+		};
+		const readResults = await readContracts(config, {
+			contracts: [
+				{
+					...contract,
+					functionName: 'name',
+				},
+				{
+					...contract,
+					functionName: 'nonces',
+					args: [account.address]
+				},
+				{
+					...contract,
+					functionName: 'version',
+				},
+			]
+		});
+		const [nameResult, nonceResult, versionResult] = readResults;
+		const nonce = nonceResult.data;
+		const version = versionResult.data;
+
+		console.log(readResults);
+
+		const name = nameResult.data;
+		const spender = ROUTER_ADDRESS;
+		const value = price * amount / 1e18;
+		const deadline = BigInt(Math.floor(Date.now() / 1000) + 86400); // 24 hours later
+
+		const domain = {
+			name: name,
+			version: version,
+			chainId: BASE_CHAIN_ID,
+			verifyingContract: USDC_ADDRESS,
+		};
+
+		const types = {
+			Permit: [
+				{ name: 'owner', type: 'address' },
+				{ name: 'spender', type: 'address' },
+				{ name: 'value', type: 'uint256' },
+				{ name: 'nonce', type: 'uint256' },
+				{ name: 'deadline', type: 'uint256' },
+			],
+		};
+
+		const { signTypedData } = useSignTypedData();
+		const message = {
+			owner: account.address,
+			spender: spender,
+			value: value,
+			nonce: BigInt(nonce),
+			deadline: deadline
+		};
+		signTypedData({
+			domain: domain,
+			types: types,
+			message: message,
+			primaryType: 'Permit'
+		}, {
+			onSuccess(data) {
+				if (isBuy) setBuyerPermitSignature(data);
+				else setSellerPermitSignature(data);
+			},
+			onError(error) {
+				console.error('Error signing USDC permit:', error);
+			}
+		});
+	}
+
 	function handleFormSubmit(event) {
 		event.preventDefault();
-		if (!token || !secondParty || !price || !amount) {
+		if (!token || !secondParty || !price || !amount || price == 0 || amount == 0) {
 			alert('Please fill in all fields.');
 		}
+
+		const dealMsg = createDealMessage();
+		signMessage({
+			message: dealMsg
+		}, {
+			onSuccess(data) {
+				if (isBuy) setBuyerSignature(data);
+				else setSellerSignature(data);
+
+				signUSDCPermit();
+			}
+		});
 	}
 
 	return (
@@ -103,7 +269,6 @@ function MainApp() {
 							<label htmlFor="token">Token</label>
 							<input
 								id="token"
-								value={token}
 								onChange={e => setToken(e.target.value)}
 								placeholder='0x0000000000000000000000000000000000000000'
 							/>
@@ -112,7 +277,6 @@ function MainApp() {
 							<label htmlFor="2ndparty">Trading with</label>
 							<input
 								id="2ndparty"
-								value={secondParty}
 								onChange={e => setSecondParty(e.target.value)}
 								placeholder='0x0000000000000000000000000000000000000000'
 							/>
@@ -121,8 +285,7 @@ function MainApp() {
 							<label htmlFor="price">Price set</label>
 							<input
 								id="price"
-								value={price}
-								onChange={e => setPrice(e.target.value)}
+								onChange={e => setPrice(Number(e.target.value))}
 								placeholder='0.00'
 							/>
 						</div>
@@ -130,8 +293,7 @@ function MainApp() {
 							<label htmlFor="amount">Amount</label>
 							<input
 								id="amount"
-								value={amount}
-								onChange={e => setAmount(e.target.value)}
+								onChange={e => setAmount(Number(e.target.value))}
 								placeholder='1000'
 							/>
 						</div>
@@ -150,6 +312,10 @@ function MainApp() {
 					secondParty={secondParty}
 					price={price}
 					amount={amount}
+					buyerSignature={buyerSignature}
+					sellerSignature={sellerSignature}
+					buyerPermitSignature={buyerPermitSignature}
+					sellerPermitSignature={sellerPermitSignature}
 				/>
 				<div className={style.dealTicketFooter}>
 					<div>
