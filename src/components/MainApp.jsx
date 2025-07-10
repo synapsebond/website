@@ -1,12 +1,13 @@
 import { CircleX, Download, Import, Paintbrush, PaintBucket, PaintRoller } from 'lucide-react';
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import DealTicket from "./DealTicket.jsx";
 
 import style from './MainApp.module.scss'
-import { useAccount, useReadContract, useSignMessage, useSignTypedData } from 'wagmi';
+import { useAccount, useReadContract, useSignMessage, useSignTypedData, WagmiProvider } from 'wagmi';
 import { keccak256, toHex } from 'viem';
 import { readContracts } from 'wagmi/actions';
+import domToImage from 'dom-to-image-more';
 import config from '../config.js';
 
 import Arrow from "../assets/arrow.svg"
@@ -100,6 +101,7 @@ function MainApp() {
 	
 	const account = useAccount();
 	const {signMessage} = useSignMessage();
+	const refToCapture = useRef(null);
 
 	const [moveHint, setMoveHint] = useState(false);
 	const [themeNonce, setThemeNonce] = useState(Math.floor(Math.random() * 500));
@@ -256,6 +258,37 @@ function MainApp() {
 		});
 	}
 
+	function downloadDealTicket() {
+		if (refToCapture.current) {
+			const scale = 4;
+			const options = {
+				width: refToCapture.current.offsetWidth * scale,
+				height: refToCapture.current.offsetHeight * scale,
+				style: {
+					transform: `scale(${scale})`,
+					transformOrigin: 'top left',
+					overflow: 'hidden',
+				}
+			};
+			// TODO: Tidy this hackish shit
+			domToImage.toBlob(refToCapture.current, options)
+				.then(blob => {
+					const link = document.createElement('a');
+					link.href = URL.createObjectURL(blob);
+					const now = new Date();
+					const pad = n => n.toString().padStart(2, '0');
+					const formattedDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+					link.download = `deal_ticket_${formattedDate}.png`;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
+				})
+				.catch(error => {
+					console.error('Error downloading deal ticket:', error);
+				});
+		}
+	}
+
 	return (
 		<div className={style.container}>
 			<div className={style.leftSide}>
@@ -325,7 +358,7 @@ function MainApp() {
 				</form>
 			</div>
 			<div className={style.dealTicket}>
-				<DealTicket
+				<DealTicket ref={refToCapture}
 					isBuy={isBuy}
 					tokenName={tokenName}
 					token={token}
@@ -338,9 +371,10 @@ function MainApp() {
 					buyerPermitSignature={buyerPermitSignature}
 					sellerPermitSignature={sellerPermitSignature}
 					themeNonce={themeNonce}
+					account={account}
 				/>
 				<div className={style.dealTicketFooter}>
-					<div>
+					<div onClick={downloadDealTicket}>
 						<Download strokeWidth={'1.5px'} size={18} /> Download
 					</div>
 					<div>

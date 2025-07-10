@@ -6,6 +6,7 @@ import style from './DealTicket.module.scss'
 import { useAccount } from 'wagmi';
 
 function DealTicket({
+  ref,
 	isBuy,
 	token,
 	tokenName,
@@ -17,9 +18,9 @@ function DealTicket({
 	sellerSignature,
 	buyerPermitSignature,
 	sellerPermitSignature,
-  themeNonce
+  themeNonce,
+  account
 }) {
-	const account = useAccount();
 	const [encoded, setEncoded] = useState('uninitialized');
 	const [theme, setTheme] = useState({
 		backgroundColor: 'rgb(255, 255, 255)',
@@ -60,7 +61,7 @@ function DealTicket({
 	]);
 
 	return (
-		<div className={style.container} style={theme}>
+		<div ref={ref} className={style.container} style={theme} id='deal'>
 			<div className={style.card}>
 				<div className={style.top}>
 					<div className={style.qr}>

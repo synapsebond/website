@@ -45,3 +45,21 @@ input {
 	font-family: inherit;
 	font-size: inherit;
 }
+
+@media print {
+	body * {
+		visibility: hidden;
+	}
+
+	#deal {
+		visibility: visible;
+		position: fixed !important;
+		top: 0;
+		left: 0;
+
+		* {
+			visibility: visible !important;
+			position: revert;
+		}
+	}
+}
