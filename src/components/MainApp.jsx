@@ -89,6 +89,7 @@ function MainApp() {
 	const [secondParty, setSecondParty] = useState('0x0000000000000000000000000000000000000000');
 	const [price, setPrice] = useState('0.00');
 	const [amount, setAmount] = useState('0');
+	const [locked, setLocked] = useState(false);
 
 	const [buyerSignature, setBuyerSignature] = useState('');
 	const [sellerSignature, setSellerSignature] = useState('');
@@ -227,6 +228,10 @@ function MainApp() {
 
 	function handleFormSubmit(event) {
 		event.preventDefault();
+		if (locked) {
+			alert("Deal locked. You can cancel the deal by using the Reject Deal button.");
+			return;
+		}
 		if (!token || !secondParty || !price || !amount || price == 0 || amount == 0) {
 			alert('Please fill in all fields.');
 			return;
@@ -237,6 +242,7 @@ function MainApp() {
 			message: dealMsg
 		}, {
 			onSuccess(data) {
+				setLocked(true);
 				if (isBuy) setBuyerSignature(data);
 				else setSellerSignature(data);
 
@@ -253,14 +259,14 @@ function MainApp() {
 						<button
 							type="button"
 							className={isBuy ? style.active : ''}
-							onClick={() => setIsBuy(true)}
+							onClick={() => !locked ? setIsBuy(true) : null}
 						>
 							Buy
 						</button>
 						<button
 							type="button"
 							className={!isBuy ? style.active : ''}
-							onClick={() => setIsBuy(false)}
+							onClick={() => !locked ? setIsBuy(false) : null}
 						>
 							Sell
 						</button>
@@ -272,6 +278,7 @@ function MainApp() {
 								id="token"
 								onChange={e => setToken(e.target.value)}
 								placeholder='0x0000000000000000000000000000000000000000'
+								disabled={locked}
 							/>
 						</div>
 						<div>
@@ -280,6 +287,7 @@ function MainApp() {
 								id="2ndparty"
 								onChange={e => setSecondParty(e.target.value)}
 								placeholder='0x0000000000000000000000000000000000000000'
+								disabled={locked}
 							/>
 						</div>
 						<div>
@@ -288,6 +296,7 @@ function MainApp() {
 								id="price"
 								onChange={e => setPrice(Number(e.target.value))}
 								placeholder='0.00'
+								disabled={locked}
 							/>
 						</div>
 						<div>
@@ -296,11 +305,17 @@ function MainApp() {
 								id="amount"
 								onChange={e => setAmount(Number(e.target.value))}
 								placeholder='1000'
+								disabled={locked}
 							/>
 						</div>
 					</div>
 					<button type="submit" className={style.submitButton + ' ' + (isBuy ? style.buttonBuy : style.buttonSell)}>
-						Sign the deal
+						{
+							locked ?
+								"DEAL LOCKED"
+								:
+								"Sign the deal"
+						}
 					</button>
 				</form>
 			</div>
