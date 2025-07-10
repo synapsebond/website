@@ -100,7 +100,8 @@ function MainApp() {
 	const [sellerPermitSignature, setSellerPermitSignature] = useState('');
 	
 	const account = useAccount();
-	const {signMessage} = useSignMessage();
+	const { signMessage } = useSignMessage();
+	const { signTypedData } = useSignTypedData();
 	const refToCapture = useRef(null);
 
 	const [moveHint, setMoveHint] = useState(false);
@@ -182,14 +183,14 @@ function MainApp() {
 			]
 		});
 		const [nameResult, nonceResult, versionResult] = readResults;
-		const nonce = nonceResult.data;
-		const version = versionResult.data;
+		const nonce = nonceResult.result;
+		const version = versionResult.result;
 
 		console.log(readResults);
 
-		const name = nameResult.data;
+		const name = nameResult.result;
 		const spender = ROUTER_ADDRESS;
-		const value = price * amount / 1e18;
+		const value = price * amount / BigInt(1e18);
 		const deadline = BigInt(Math.floor(Date.now() / 1000) + 86400); // 24 hours later
 
 		const domain = {
@@ -209,7 +210,6 @@ function MainApp() {
 			],
 		};
 
-		const { signTypedData } = useSignTypedData();
 		const message = {
 			owner: account.address,
 			spender: spender,
@@ -260,7 +260,7 @@ function MainApp() {
 
 	function downloadDealTicket() {
 		if (refToCapture.current) {
-			const scale = 4;
+			const scale = 8;
 			const options = {
 				width: refToCapture.current.offsetWidth * scale,
 				height: refToCapture.current.offsetHeight * scale,
@@ -332,7 +332,7 @@ function MainApp() {
 							<label htmlFor="price">Price set</label>
 							<input
 								id="price"
-								onChange={e => setPrice(Number(e.target.value))}
+								onChange={e => setPrice(BigInt(Math.floor(Number(e.target.value) * 1e6)))}
 								placeholder='0.00'
 								disabled={locked}
 							/>
@@ -341,7 +341,7 @@ function MainApp() {
 							<label htmlFor="amount">Amount</label>
 							<input
 								id="amount"
-								onChange={e => setAmount(Number(e.target.value))}
+								onChange={e => setAmount(BigInt(Number(e.target.value) * 1e18))}
 								placeholder='1000'
 								disabled={locked}
 							/>

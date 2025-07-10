@@ -41,7 +41,7 @@ function DealTicket({
 			token,
 			buyer: isBuy ? account.address : secondParty,
 			seller: !isBuy ? account.address : secondParty,
-			price, amount,
+			price: price.toString(), amount: amount.toString(),
 			buyerSignature,
 			sellerSignature,
 			buyerPermitSignature,
