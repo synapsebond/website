@@ -229,6 +229,7 @@ function MainApp() {
 		event.preventDefault();
 		if (!token || !secondParty || !price || !amount || price == 0 || amount == 0) {
 			alert('Please fill in all fields.');
+			return;
 		}
 
 		const dealMsg = createDealMessage();
