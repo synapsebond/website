@@ -4,6 +4,10 @@ import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react';
 import style from './DealTicket.module.scss'
 import { useAccount } from 'wagmi';
+import Big from 'big.js';
+
+Big.DP = 18;
+Big.RM = Big.roundDown;
 
 function DealTicket({
   ref,
@@ -75,11 +79,11 @@ function DealTicket({
 						</div>
 						<div>
 							<span>Price</span>
-							<span>{price} USDC</span>
+							<span>{(Big(price) / Big('1e6'))} USDC</span>
 						</div>
 						<div>
 							<span>Amount</span>
-							<span>{amount} {tokenSymbol}</span>
+							<span>{(Big(amount) / Big('1e18'))} {tokenSymbol}</span>
 						</div>
 					</div>
 				</div>

@@ -11,6 +11,10 @@ import domToImage from 'dom-to-image-more';
 import config from '../config.js';
 
 import Arrow from "../assets/arrow.svg"
+import Big from 'big.js';
+
+Big.DP = 18;
+Big.RM = Big.roundDown;
 
 const ERC20_ABI = [
 	{
@@ -190,8 +194,8 @@ function MainApp() {
 
 		const name = nameResult.result;
 		const spender = ROUTER_ADDRESS;
-		const value = price * amount / BigInt(1e18);
-		const deadline = BigInt(Math.floor(Date.now() / 1000) + 86400); // 24 hours later
+		const value = Big(price).mul(amount).div(Big('1e18'));
+		const deadline = BigInt(Big(Date.now()).div('1000').toFixed(0)) + BigInt('86400'); // 24 hours later
 
 		const domain = {
 			name: name,
@@ -214,8 +218,8 @@ function MainApp() {
 			owner: account.address,
 			spender: spender,
 			value: value,
-			nonce: BigInt(nonce),
-			deadline: deadline
+			nonce: Big(nonce).toString(),
+			deadline: deadline.toString()
 		};
 		signTypedData({
 			domain: domain,
@@ -332,7 +336,7 @@ function MainApp() {
 							<label htmlFor="price">Price set</label>
 							<input
 								id="price"
-								onChange={e => setPrice(BigInt(Math.floor(Number(e.target.value) * 1e6)))}
+								onChange={e => setPrice((BigInt(Big(e.target.value).mul(Big(1e6)))))}
 								placeholder='0.00'
 								disabled={locked}
 							/>
@@ -341,7 +345,7 @@ function MainApp() {
 							<label htmlFor="amount">Amount</label>
 							<input
 								id="amount"
-								onChange={e => setAmount(BigInt(Number(e.target.value) * 1e18))}
+								onChange={e => setAmount((BigInt(e.target.value) * (BigInt(1e18))))}
 								placeholder='1000'
 								disabled={locked}
 							/>
