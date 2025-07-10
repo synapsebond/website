@@ -67,10 +67,6 @@
 			background: var(--l2-bg-color);
 		}
 	}
-
-	> div:last-child > input {
-		border-bottom: 0;
-	}
 }
 
 .dealTicket {
@@ -79,25 +75,56 @@
 }
 
 .dealTicketFooter {
+	display: flex;
 	flex: 1;
 	
 	border-top: 1px solid var(--bd-color);
 
 	> div {
+		flex: 1;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: var(--padding-sm);
+		padding: var(--padding-nm);
 
 		gap: var(--padding-sm);
 		cursor: pointer;
-	}
-
-	&:hover {
-		background: var(--bd-color);
+	
+		&:hover {
+			background: var(--bd-color);
+		}
 	}
 }
 
 .active {
 	background: var(--bd-color) !important;
+}
+
+.submitButton {
+	border: 0;
+	width: 100%;
+	padding: var(--padding-nm) var(--padding-bg);
+
+	background: var(--fg-color);
+	color: var(--bg-color);
+
+	cursor: pointer;
+	transition: 0.4s;
+
+	&:hover {
+		background: var(--ac-color);
+		color: var(--bg-color);
+	}
+
+	&:active {
+		background: var(--l2-bg-color);
+		color: var(--l2-fg-color);
+	}
+}
+
+.buttonSell {
+	&:hover {
+		background: var(--ac2-color);
+		color: var(--bg-color);
+	}
 }

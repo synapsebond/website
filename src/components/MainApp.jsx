@@ -1,4 +1,4 @@
-import { Download } from 'lucide-react';
+import { CircleX, Cross, Download, Import } from 'lucide-react';
 import { useEffect, useState } from 'react'
 
 import DealTicket from "./DealTicket.jsx";
@@ -71,10 +71,17 @@ function MainApp() {
 		if (symbolError) console.error('Error fetching token symbol:', symbolError);
 	}, [symbolData, symbolError]);
 
+	function handleFormSubmit(event) {
+		event.preventDefault();
+		if (!token || !secondParty || !price || !amount) {
+			alert('Please fill in all fields.');
+		}
+	}
+
 	return (
 		<div className={style.container}>
 			<div className={style.leftSide}>
-				<form>
+				<form onSubmit={handleFormSubmit}>
 					<div className={style.tab}>
 						<button
 							type="button"
@@ -98,6 +105,7 @@ function MainApp() {
 								id="token"
 								value={token}
 								onChange={e => setToken(e.target.value)}
+								placeholder='0x0000000000000000000000000000000000000000'
 							/>
 						</div>
 						<div>
@@ -106,6 +114,7 @@ function MainApp() {
 								id="2ndparty"
 								value={secondParty}
 								onChange={e => setSecondParty(e.target.value)}
+								placeholder='0x0000000000000000000000000000000000000000'
 							/>
 						</div>
 						<div>
@@ -114,6 +123,7 @@ function MainApp() {
 								id="price"
 								value={price}
 								onChange={e => setPrice(e.target.value)}
+								placeholder='0.00'
 							/>
 						</div>
 						<div>
@@ -122,9 +132,13 @@ function MainApp() {
 								id="amount"
 								value={amount}
 								onChange={e => setAmount(e.target.value)}
+								placeholder='1000'
 							/>
 						</div>
 					</div>
+					<button type="submit" className={style.submitButton + ' ' + (isBuy ? style.buttonBuy : style.buttonSell)}>
+						Sign the deal
+					</button>
 				</form>
 			</div>
 			<div className={style.dealTicket}>
@@ -140,6 +154,12 @@ function MainApp() {
 				<div className={style.dealTicketFooter}>
 					<div>
 						<Download strokeWidth={'1.5px'} size={18} /> Download
+					</div>
+					<div>
+						<Import strokeWidth={'1.5px'} size={18} /> Import Deal
+					</div>
+					<div>
+						<CircleX strokeWidth={'1.5px'} size={18} /> Reject Deal
 					</div>
 				</div>
 			</div>
