@@ -93,6 +93,11 @@
 		&:hover {
 			background: var(--bd-color);
 		}
+
+		&:active {
+			background: var(--l2-bg-color) !important;
+			color: var(--l2-fg-color) !important;
+		}
 	}
 }
 
@@ -117,8 +122,8 @@
 	}
 
 	&:active {
-		background: var(--l2-bg-color);
-		color: var(--l2-fg-color);
+		background: var(--l2-bg-color) !important;
+		color: var(--l2-fg-color) !important;
 	}
 }
 
