@@ -1,0 +1,27 @@
+:root {
+	--padding-sm: 0.5rem;
+	--padding-nm: 1rem;
+	--padding-md: 1.5rem;
+	--padding-bg: 2rem;
+
+	--bg-color: #171717;
+	--fg-color: #eeeeee;
+	--bd-color: #333333;
+	--ac-color: #26c394;
+}
+
+* {
+	box-sizing: border-box;
+	outline: none;
+}
+
+body {
+	margin: 0;
+	min-height: 100vh;
+
+	font-family: Arial, Helvetica, sans-serif;
+	color: var(--fg-color);
+	background: var(--bg-color);
+
+	border: 1px solid var(--bd-color);
+}
