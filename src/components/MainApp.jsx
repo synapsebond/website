@@ -303,6 +303,11 @@ function MainApp() {
 
 	return (
 		<div className={style.container}>
+			{!account.isConnected &&
+				<div className={style.overlay}>
+					<span>Please connect your wallet first.</span>
+				</div>
+			}
 			<div className={style.leftSide}>
 				<form onSubmit={handleFormSubmit}>
 					<div className={style.tab}>

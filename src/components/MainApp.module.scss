@@ -12,6 +12,25 @@
 	border: 1px solid var(--bd-color);
 }
 
+.overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	background: rgba(0, 0, 0, 0.8);
+	color: var(--fg-color);
+	font-size: larger;
+	backdrop-filter: blur(2px);
+
+	z-index: 10;
+}
+
 .leftSide {
 	display: flex;
 	flex-direction: column;
