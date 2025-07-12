@@ -18,6 +18,7 @@ function DealTicket({
 	secondParty,
 	price,
 	amount,
+  deadline,
 	buyerSignature,
 	sellerSignature,
 	buyerPermitSignature,
@@ -46,6 +47,7 @@ function DealTicket({
 			buyer: isBuy ? account.address : secondParty,
 			seller: !isBuy ? account.address : secondParty,
 			price: price.toString(), amount: amount.toString(),
+      deadline: deadline.toString(),
 			buyerSignature,
 			sellerSignature,
 			buyerPermitSignature,
@@ -57,6 +59,7 @@ function DealTicket({
 		isBuy, token,
 		account, secondParty,
 		price, amount,
+    deadline,
 		buyerSignature,
 		sellerSignature,
 		buyerPermitSignature,
@@ -99,7 +102,17 @@ function DealTicket({
 						</div>
 						<div>
 							<span>Deadline</span>
-							<span>20 November 2030 12:30:23 (GMT+1)</span>
+							<span>{deadline
+                  ? new Date(Number(deadline) * 1000).toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZoneName: 'short'
+                  })
+                  : ''}</span>
 						</div>
 					</div>
 					<div className={style.signDetails}>

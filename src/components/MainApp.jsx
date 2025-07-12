@@ -96,6 +96,7 @@ function MainApp() {
 	const [secondParty, setSecondParty] = useState('0x0000000000000000000000000000000000000000');
 	const [price, setPrice] = useState('0.00');
 	const [amount, setAmount] = useState('0');
+	const [deadline, setDeadline] = useState(Math.floor(Date.now() / 1000) + 86400);
 	const [locked, setLocked] = useState(false);
 
 	const [buyerSignature, setBuyerSignature] = useState('');
@@ -363,6 +364,20 @@ function MainApp() {
 								disabled={locked}
 							/>
 						</div>
+						<div>
+							<label htmlFor="deadline">Deadline</label>
+							<input
+								id="deadline"
+								type="datetime-local"
+								disabled={locked}
+								defaultValue={new Date(Date.now() + 86400 * 1000).toISOString().slice(0, 16)}
+								onChange={e => {
+									const date = new Date(e.target.value);
+									const deadline = Math.floor(date.getTime() / 1000);
+									setDeadline(deadline);
+								}}
+							/>
+						</div>
 					</div>
 					<button type="submit" className={style.submitButton + ' ' + (isBuy ? style.buttonBuy : style.buttonSell)}>
 						{
@@ -383,6 +398,7 @@ function MainApp() {
 					secondParty={secondParty}
 					price={price}
 					amount={amount}
+					deadline={deadline}
 					buyerSignature={buyerSignature}
 					sellerSignature={sellerSignature}
 					buyerPermitSignature={buyerPermitSignature}
