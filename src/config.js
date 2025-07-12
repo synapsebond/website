@@ -8,7 +8,7 @@ const config = getDefaultConfig({
   projectId: 'ec3d44586488da65eb148d3008679c72',
   ssr: false,
   transports: {
-    [base.id]: http("http://localhost:8545")
+    [base.id]: http("https://base.llamarpc.com")
   }
 });
 
