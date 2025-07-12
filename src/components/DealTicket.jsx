@@ -75,19 +75,29 @@ function DealTicket({
 						<QRCodeSVG value={encoded} bgColor={theme.backgroundColor} fgColor={theme.color} />
 					</div>
 				
-					<div className={style.details}>
+					<div className={style.details} style={{width: '100%'}}>
 						<div className={style.detailsException}>
 							<span className={isBuy ? style.buy : style.sell}>{isBuy ? 'BUY' : 'SELL'}</span>
 							<span>{tokenName}</span>
 						</div>
-						<div>
-							<span>Price</span>
-							<span>{(Big(price) / Big('1e6'))} USDC</span>
-						</div>
-						<div>
-							<span>Amount</span>
-							<span>{(Big(amount) / Big('1e18'))} {tokenSymbol}</span>
-						</div>
+            <div className={style.detailsException2}>
+              <div className={style.details}>
+                <div>
+                  <span>Price</span>
+                  <span>{(Big(price).div(Big('1e6'))).toString()} USDC</span>
+                </div>
+                <div>
+                  <span>Amount</span>
+                  <span>{(Big(amount).div(Big('1e18'))).toString()} {tokenSymbol}</span>
+                </div>
+              </div>
+              <div className={style.details}>
+                <div>
+                  <span>Value</span>
+                  <span>{(Big(price).mul(Big(amount)).div(Big('1e18')).div(Big('1e6'))).toString()} USDC</span>
+                </div>
+              </div>
+            </div>
 					</div>
 				</div>
 				<div className={style.bottom}>

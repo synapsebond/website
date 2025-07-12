@@ -26,6 +26,9 @@
 	justify-content: space-between;
 }
 
+.qr {
+}
+
 .details {
 	> div {
 		display: flex;
@@ -57,6 +60,14 @@
 .detailsException {
 	flex-direction: row !important;
 	align-items: center;
+}
+
+.detailsException2 {
+	flex-direction: row !important;
+	justify-content: space-between;
+	width: 100%;
+	
+	gap: 1em;
 }
 
 .buy, .sell {
