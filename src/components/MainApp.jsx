@@ -13,6 +13,8 @@ import config from '../config.js';
 import Arrow from "../assets/arrow.svg"
 import Big from 'big.js';
 
+import jsqr from 'jsqr';
+
 Big.DP = 18;
 Big.RM = Big.roundDown;
 
@@ -111,6 +113,12 @@ function MainApp() {
 
 	const [moveHint, setMoveHint] = useState(false);
 	const [themeNonce, setThemeNonce] = useState(Math.floor(Math.random() * 500));
+
+	const tokenRef = useRef(null);
+	const secondPartyRef = useRef(null);
+	const priceRef = useRef(null);
+	const amountRef = useRef(null);
+	const deadlineRef = useRef(null);
 
 	// TODO: Make this to not use generic variable names
 	const { data, error } = useReadContract({
@@ -302,6 +310,94 @@ function MainApp() {
 		}
 	}
 
+	// TODO: Modularise this
+	function handleImport(e) {
+		// scan qr code
+		const file = e.target.files[0];
+		// convert to data URI
+		const reader = new FileReader();
+		reader.onload = async function(event) {
+			const img = new Image();
+			img.onload = async function() {
+				const canvas = document.createElement('canvas');
+				canvas.width = img.width;
+				canvas.height = img.height;
+				const ctx = canvas.getContext('2d');
+				ctx.drawImage(img, 0, 0);
+				const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+				// Convert to black and white
+				for (let i = 0; i < imageData.data.length; i += 4) {
+					const r = imageData.data[i];
+					const g = imageData.data[i + 1];
+					const b = imageData.data[i + 2];
+					// Luminance formula
+					const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+					const bw = gray > 128 ? 255 : 0;
+					imageData.data[i] = bw;
+					imageData.data[i + 1] = bw;
+					imageData.data[i + 2] = bw;
+				}
+				ctx.putImageData(imageData, 0, 0);
+
+				const bwImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				const code = jsqr(bwImageData.data, canvas.width, canvas.height);
+				if (!code) {
+					alert("No QR code found in the image.");
+					return;
+				}
+				const content = code.data;
+				// parse into JSON
+				const data = JSON.parse(content);
+				console.dir(data);
+				
+				if (data.buyer == account.address) {
+					setIsBuy(true);
+				} else if (data.seller == account.address) {
+					setIsBuy(false);
+				} else {
+					alert("This order is not for you.");
+					return;
+				}
+
+				// Convert unix timestamp to "YYYY-MM-DDTHH:MM" format for input
+				const deadlineDate = new Date(data.deadline * 1000);
+				const pad = n => n.toString().padStart(2, '0');
+				const formattedDeadline = `${deadlineDate.getFullYear()}-${pad(deadlineDate.getMonth() + 1)}-${pad(deadlineDate.getDate())}T${pad(deadlineDate.getHours())}:${pad(deadlineDate.getMinutes())}`;
+
+				tokenRef.current.value = data.token;
+				secondPartyRef.current.value = data.buyer == account.address ? data.seller : data.buyer;
+				priceRef.current.value = Big(data.price).div(1e6);
+				amountRef.current.value = Big(data.amount).div(1e18);
+
+				setToken(data.token);
+				setSecondParty(data.buyer == account.address ? data.seller : data.buyer);
+				setPrice(data.price);
+				setAmount(data.amount);
+
+				deadlineRef.current.value = formattedDeadline;
+				setDeadline(data.deadline);
+
+				setBuyerSignature(data.buyerSignature);
+				setSellerSignature(data.sellerSignature);
+				setBuyerPermitSignature(data.buyerPermitSignature);
+				setSellerPermitSignature(data.sellerPermitSignature);
+
+				setThemeNonce(data.themeNonce);
+			};
+			img.src = event.target.result;
+		};
+		reader.readAsDataURL(file);
+	}
+
+	function importDealTicket() {
+		// open select file modal
+		const inp = document.createElement('input');
+		inp.type = 'file';
+		inp.addEventListener('change', handleImport);
+		inp.click();
+	}
+
 	return (
 		<div className={style.container}>
 			{!account.isConnected &&
@@ -332,6 +428,7 @@ function MainApp() {
 							<label htmlFor="token">Token</label>
 							<input
 								id="token"
+								ref={tokenRef}
 								onChange={e => setToken(e.target.value)}
 								placeholder='0x0000000000000000000000000000000000000000'
 								disabled={locked}
@@ -341,6 +438,7 @@ function MainApp() {
 							<label htmlFor="2ndparty">Trading with</label>
 							<input
 								id="2ndparty"
+								ref={secondPartyRef}
 								onChange={e => setSecondParty(e.target.value)}
 								placeholder='0x0000000000000000000000000000000000000000'
 								disabled={locked}
@@ -350,6 +448,7 @@ function MainApp() {
 							<label htmlFor="price">Price set</label>
 							<input
 								id="price"
+								ref={priceRef}
 								onChange={e => setPrice((BigInt(Big(e.target.value).mul(Big(1e6)).toFixed(0))))}
 								placeholder='0.00'
 								disabled={locked}
@@ -359,6 +458,7 @@ function MainApp() {
 							<label htmlFor="amount">Amount</label>
 							<input
 								id="amount"
+								ref={amountRef}
 								onChange={e => setAmount((BigInt(Big(e.target.value).mul(Big(1e18)).toFixed(0))))}
 								placeholder='1000'
 								disabled={locked}
@@ -369,6 +469,7 @@ function MainApp() {
 							<input
 								id="deadline"
 								type="datetime-local"
+								ref={deadlineRef}
 								disabled={locked}
 								defaultValue={new Date(Date.now() + 86400 * 1000).toISOString().slice(0, 16)}
 								onChange={e => {
@@ -410,7 +511,7 @@ function MainApp() {
 					<div onClick={downloadDealTicket}>
 						<Download strokeWidth={'1.5px'} size={18} /> Download
 					</div>
-					<div>
+					<div onClick={importDealTicket}>
 						<Import strokeWidth={'1.5px'} size={18} /> Import Deal
 					</div>
 					<div>
