@@ -11,3 +11,12 @@
 .brand {
 	color: var(--ac-color);
 }
+
+@media screen and (max-width: 768px) {
+	.nav > div {
+		max-width: 40%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}	
+}
