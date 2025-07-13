@@ -230,6 +230,10 @@
 		&::after {
 			content: "Random Theme";
 		}
+
+		&:hover {
+			transform: none;
+		}
 	}
 
 	.randomThemeHint {
