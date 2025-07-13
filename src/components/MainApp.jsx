@@ -113,6 +113,7 @@ function MainApp() {
 
 	const [moveHint, setMoveHint] = useState(false);
 	const [themeNonce, setThemeNonce] = useState(Math.floor(Math.random() * 500));
+	const [importing, setImporting] = useState(false);
 
 	const tokenRef = useRef(null);
 	const secondPartyRef = useRef(null);
@@ -144,6 +145,18 @@ function MainApp() {
 		if (symbolData) setTokenSymbol(symbolData);
 		if (symbolError) console.error('Error fetching token symbol:', symbolError);
 	}, [symbolData, symbolError]);
+
+	// Signature revoking alterations
+	useEffect(() => {
+		if (!importing) {
+			setBuyerSignature('');
+			setSellerSignature('');
+			setBuyerPermitSignature('');
+			setSellerPermitSignature('');
+			setLocked(false);
+		}
+		setImporting(false);
+	}, [isBuy, token, price, amount, secondParty, deadline]);
 
 	function createDealMessage() {
 		const buyer = isBuy ? account.address : secondParty;
@@ -312,6 +325,7 @@ function MainApp() {
 
 	// TODO: Modularise this
 	function handleImport(e) {
+		setImporting(true);
 		// scan qr code
 		const file = e.target.files[0];
 		// convert to data URI
@@ -384,6 +398,7 @@ function MainApp() {
 				setSellerPermitSignature(data.sellerPermitSignature);
 
 				setThemeNonce(data.themeNonce);
+				setLocked(false);
 			};
 			img.src = event.target.result;
 		};
