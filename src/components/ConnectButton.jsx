@@ -1,5 +1,5 @@
 import { useAccountModal, useChainModal, useConnectModal } from '@rainbow-me/rainbowkit';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 import style from './ConnectButton.module.scss'
 import { useAccount, useAccountEffect, useDisconnect } from 'wagmi';
@@ -8,7 +8,7 @@ function ConnectButton() {
 	const { openConnectModal } = useConnectModal();
 	const { openAccountModal } = useAccountModal();
 	const { openChainModal } = useChainModal();
-	const { isConnected } = useAccount();
+	const { isConnected, address } = useAccount();
 	const { disconnect } = useDisconnect();
 
 	function handleClick() {
@@ -26,6 +26,10 @@ function ConnectButton() {
 			setText('Connect');
 		}
 	});
+
+	useEffect(() => {
+		setText(address);
+	}, [address]);
 
 	return (
 		<div onClick={handleClick} className={style.button}>
