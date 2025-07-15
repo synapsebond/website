@@ -91,6 +91,7 @@
 .dealTicket {
 	display: flex;
 	flex-direction: column;
+	min-width: 430px;
 }
 
 .dealTicketFooter {
@@ -213,6 +214,10 @@
 		left: 0;
 		transform: none;
 		max-width: 100%;
+	}
+
+	.dealTicket {
+		min-width: none;
 	}
 
 	.dealTicketFooter {

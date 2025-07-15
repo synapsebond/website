@@ -99,6 +99,7 @@ function MainApp() {
 	const [price, setPrice] = useState('0.00');
 	const [amount, setAmount] = useState('0');
 	const [deadline, setDeadline] = useState(Math.floor(Date.now() / 1000) + 86400);
+	const [initiatedAt, setIniatedAt] = useState(Math.floor(Date.now() / 1000));
 	const [locked, setLocked] = useState(false);
 
 	const [buyerSignature, setBuyerSignature] = useState('');
@@ -161,7 +162,6 @@ function MainApp() {
 	function createDealMessage() {
 		const buyer = isBuy ? account.address : secondParty;
 		const seller = !isBuy ? account.address : secondParty;
-		const initiatedAt = Math.floor(Date.now() / 1000);
 		const deadline = initiatedAt + 86400; // 24 hours later
 		const message =
 			`Buyer: ${buyer}\n` +
@@ -269,6 +269,10 @@ function MainApp() {
 		if (!token || !secondParty || !price || !amount || price == 0 || amount == 0) {
 			alert('Please fill in all fields.');
 			return;
+		}
+
+		if (!buyerSignature && !buyerPermitSignature && !sellerSignature && !sellerPermitSignature) {
+			setIniatedAt(Math.floor(Date.now() / 1000));
 		}
 
 		const dealMsg = createDealMessage();
@@ -388,6 +392,7 @@ function MainApp() {
 				setSecondParty(data.buyer == account.address ? data.seller : data.buyer);
 				setPrice(data.price);
 				setAmount(data.amount);
+				setIniatedAt(data.initiatedAt);
 
 				deadlineRef.current.value = formattedDeadline;
 				setDeadline(data.deadline);
@@ -521,6 +526,7 @@ function MainApp() {
 					sellerPermitSignature={sellerPermitSignature}
 					themeNonce={themeNonce}
 					account={account}
+					initiatedAt={initiatedAt}
 				/>
 				<div className={style.dealTicketFooter}>
 					<div onClick={downloadDealTicket}>

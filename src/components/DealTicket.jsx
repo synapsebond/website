@@ -24,7 +24,8 @@ function DealTicket({
 	buyerPermitSignature,
 	sellerPermitSignature,
   themeNonce,
-  account
+  account,
+  initiatedAt
 }) {
 	const [encoded, setEncoded] = useState('uninitialized');
 	const [theme, setTheme] = useState({
@@ -47,7 +48,7 @@ function DealTicket({
 			buyer: isBuy ? account.address : secondParty,
 			seller: !isBuy ? account.address : secondParty,
 			price: price.toString(), amount: amount.toString(),
-      deadline: deadline.toString(),
+      deadline: deadline.toString(), initiatedAt: initiatedAt.toString(),
 			buyerSignature,
 			sellerSignature,
 			buyerPermitSignature,
@@ -59,7 +60,7 @@ function DealTicket({
 		isBuy, token,
 		account, secondParty,
 		price, amount,
-    deadline,
+    deadline, initiatedAt,
 		buyerSignature,
 		sellerSignature,
 		buyerPermitSignature,
@@ -114,6 +115,20 @@ function DealTicket({
 							<span>Deadline</span>
 							<span>{deadline
                   ? new Date(Number(deadline) * 1000).toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZoneName: 'short'
+                  })
+                  : ''}</span>
+						</div>
+						<div>
+							<span>Initiated At</span>
+							<span>{initiatedAt
+                  ? new Date(Number(initiatedAt) * 1000).toLocaleString('en-GB', {
                     day: '2-digit',
                     month: 'long',
                     year: 'numeric',
