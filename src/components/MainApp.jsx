@@ -337,7 +337,7 @@ function MainApp() {
 		reader.onload = async function(event) {
 			const img = new Image();
 			img.onload = async function() {
-				const image_downscale = 1;
+				const image_downscale = 0.38;
 				const canvas = document.createElement('canvas');
 				canvas.width = img.width * image_downscale;
 				canvas.height = img.height * image_downscale;
