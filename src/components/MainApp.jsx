@@ -337,34 +337,51 @@ function MainApp() {
 		reader.onload = async function(event) {
 			const img = new Image();
 			img.onload = async function() {
+				const image_downscale = 1;
 				const canvas = document.createElement('canvas');
-				canvas.width = img.width;
-				canvas.height = img.height;
+				canvas.width = img.width * image_downscale;
+				canvas.height = img.height * image_downscale;
 				const ctx = canvas.getContext('2d');
 				ctx.drawImage(img, 0, 0);
 				const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-				// Convert to black and white
+				const rgbDict = {};
+				
 				for (let i = 0; i < imageData.data.length; i += 4) {
 					const r = imageData.data[i];
 					const g = imageData.data[i + 1];
 					const b = imageData.data[i + 2];
-					// Luminance formula
-					const gray = 0.299 * r + 0.587 * g + 0.114 * b;
-					const bw = gray > 128 ? 255 : 0;
-					imageData.data[i] = bw;
-					imageData.data[i + 1] = bw;
-					imageData.data[i + 2] = bw;
+					rgbDict[`${r}|${g}|${b}`] = (rgbDict[`${r}|${g}|${b}`] ?? 0) + 1;
 				}
+				const sorted = Object.entries(rgbDict).sort(x => x[2]);
+				const [br, bg, bb] = sorted[0][0].split('|').map(Number);
+				const [fr, fg, fb] = sorted[1][0].split('|').map(Number);
+
+				// Convert to bw background foreground
+				for (let i = 0; i < imageData.data.length; i += 4) {
+					const r = imageData.data[i];
+					const g = imageData.data[i + 1];
+					const b = imageData.data[i + 2];
+					if (r == br && g == bg && b == bb) {
+						imageData.data[i] = 255;
+						imageData.data[i + 1] = 255;
+						imageData.data[i + 2] = 255;
+					} else if (r == fr && g == fg && b == fb) {
+						imageData.data[i] = 0;
+						imageData.data[i + 1] = 0;
+						imageData.data[i + 2] = 0;
+					}
+				}
+
 				ctx.putImageData(imageData, 0, 0);
 
 				const bwImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-				const code = jsqr(bwImageData.data, canvas.width, canvas.height);
-				if (!code) {
+				const codebw = jsqr(bwImageData.data, canvas.width, canvas.height, { inversionAttempts: 'dontInvert' });
+				if (!codebw) {
 					alert("No QR code found in the image.");
 					return;
 				}
-				const content = code.data;
+				const content = codebw.data;
 				// parse into JSON
 				const data = JSON.parse(content);
 				console.dir(data);
