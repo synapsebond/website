@@ -28,7 +28,7 @@ function ConnectButton() {
 	});
 
 	useEffect(() => {
-		setText(address);
+		setText(address || 'Connect');
 	}, [address]);
 
 	return (
